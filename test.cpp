@@ -18,9 +18,16 @@ Image expectedImage = {
 
 bool closeEnough(Image a, Image b, int variability)
 {
+	if (a.width != b.width || a.height != b.height) return false;
+	for (int i=0; i < sizeof(expectedPixels); ++i) {
+		if (abs(a.pixels[i] - b.pixels[i]) > variability) {
+			return false;
+		}
+	}
+	return true;
 }
 
-void testLoadImage(const char* path)
+void testLoadImage(const char* path, int variability)
 {
 	FILE* file = fopen(path, "rb");
 	if (file) {
@@ -33,9 +40,7 @@ void testLoadImage(const char* path)
 
 		Image image = loadImage(bytes, byteCount);
 		size_t pixelByteCount = image.width * image.height * 4;
-		if (image.width == expectedImage.width
-				&& image.height == expectedImage.height
-				&& memcmp(image.pixels, expectedImage.pixels, pixelByteCount) == 0)
+		if (closeEnough(image, expectedImage, variability))
 		{
 			++passedTests;
 		} else {
@@ -55,7 +60,8 @@ void testLoadImage(const char* path)
 
 int main()
 {
-	testLoadImage("test.png");
+	testLoadImage("test.png", 0);
+	testLoadImage("test.jpg", 2);
 
 	printf("Passed %d/%d tests\n", passedTests, passedTests + failedTests);
 	return (failedTests == 0)? 0 : 1;
