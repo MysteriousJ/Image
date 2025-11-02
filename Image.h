@@ -37,6 +37,70 @@ bool isJpeg(const uint8_t* bytes, size_t byteCount)
 }
 
 #ifdef _WIN32
+#include <wincodec.h>
+#include <shlwapi.h>
+
+Image loadImage(const uint8_t* bytes, size_t byteCount)
+{
+	CoInitialize(NULL);
+	Image result = {0};
+	IStream* stream = SHCreateMemStream(bytes, (UINT)byteCount);
+	IWICImagingFactory *imagingFactory = 0;
+	CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (void **) &imagingFactory);
+
+	IWICBitmapDecoder *decoder = 0;
+	IWICBitmapFrameDecode *frame = 0;
+	imagingFactory->CreateDecoderFromStream(stream, NULL, WICDecodeMetadataCacheOnLoad, &decoder);
+	if (decoder) decoder->GetFrame(0, &frame);
+
+	IWICFormatConverter *converter = 0;
+	if (frame) {
+		imagingFactory->CreateFormatConverter(&converter);
+		converter->Initialize(frame, GUID_WICPixelFormat32bppRGBA, WICBitmapDitherTypeNone, 0, 0, WICBitmapPaletteTypeCustom);
+		converter->GetSize(&result.width, &result.height);
+	}
+
+	UINT imageByteCount = result.width * result.height * 4;
+	UINT stride = result.width * 4;
+	if (imageByteCount > 0) {
+		result.pixels = (uint8_t*)malloc(imageByteCount);
+	}
+	if (result.pixels) {
+		converter->CopyPixels(NULL, stride, imageByteCount, result.pixels);
+	}
+
+	if (frame) frame->Release();
+	if (decoder) decoder->Release();
+	if (converter) converter->Release();
+	imagingFactory->Release();
+	stream->Release();
+
+	return result;
+}
+
+ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
+{
+	CoInitialize(NULL);
+	ImageMetadata result = {0};
+	IStream* stream = SHCreateMemStream(bytes, (UINT)byteCount);
+	IWICImagingFactory *imagingFactory = 0;
+	CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (void **) &imagingFactory);
+
+	IWICBitmapDecoder *decoder = 0;
+	IWICBitmapFrameDecode *frame = 0;
+	imagingFactory->CreateDecoderFromStream(stream, NULL, WICDecodeMetadataCacheOnLoad, &decoder);
+	if (decoder) decoder->GetFrame(0, &frame);
+	if (frame) {
+		frame->GetSize(&result.width, &result.height);
+		frame->Release();
+	}
+
+	if (decoder) decoder->Release();
+	if (imagingFactory) imagingFactory->Release();
+	stream->Release();
+
+	return result;
+}
 #endif // _WIN32
 
 #ifdef __APPLE__

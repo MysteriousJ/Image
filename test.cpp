@@ -1,4 +1,5 @@
 #include "Image.h"
+#include <stdio.h>
 
 int passedTests = 0;
 int failedTests = 0;
@@ -11,9 +12,9 @@ uint8_t expectedPixels[] = {
 };
 
 Image expectedImage = {
-	.pixels = expectedPixels,
-	.width = 2,
-	.height = 2,
+	expectedPixels,
+	2,
+	2,
 };
 
 bool closeEnough(Image a, Image b, int variability)
