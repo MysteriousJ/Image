@@ -40,6 +40,61 @@ bool isJpeg(const uint8_t* bytes, size_t byteCount)
 #endif // _WIN32
 
 #ifdef __APPLE__
+#include <CoreImage/CoreImage.h>
+
+Image loadImage(const uint8_t* bytes, size_t byteCount)
+{
+	Image result = {0};
+
+	CFDataRef data = CFDataCreate(0, bytes, byteCount);
+	CGImageSourceRef imageSource = CGImageSourceCreateWithData(data, NULL);
+	CGImage* image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+
+	result.width = CGImageGetWidth(image);
+	result.height = CGImageGetHeight(image);
+	if (result.width > 0 && result.height > 0) {
+		result.pixels = (uint8_t*)calloc(result.width * result.height, 4);
+	}
+	if (result.pixels) {
+		CGColorSpace* colorSpace = CGColorSpaceCreateDeviceRGB();
+		CGContext* cgContext = CGBitmapContextCreate(
+				result.pixels,
+				result.width,
+				result.height,
+				8,
+				4 * result.width,
+				colorSpace,
+				kCGImageAlphaPremultipliedLast);
+		CGRect rect = CGRectMake(0, 0, result.width, result.height);
+		CGContextDrawImage(cgContext, rect, image);
+
+		CGColorSpaceRelease(colorSpace);
+		CGContextRelease(cgContext);
+	}
+
+	CGImageRelease(image);
+	CFRelease(imageSource);
+	CFRelease(data);
+
+	return result;
+}
+
+ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
+{
+	ImageMetadata result = {0};
+
+	CFDataRef data = CFDataCreate(0, bytes, byteCount);
+	CGImageSourceRef imageSource = CGImageSourceCreateWithData(data, NULL);
+	CGImage* image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+
+	result.width = CGImageGetWidth(image);
+	result.height = CGImageGetHeight(image);
+
+	CGImageRelease(image);
+	CFRelease(imageSource);
+	CFRelease(data);
+	return result;
+}
 #endif // __APPLE__ 
 
 #if defined(__linux__) && !defined(__ANDROID__)
