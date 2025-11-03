@@ -51,27 +51,29 @@ Image loadImage(const uint8_t* bytes, size_t byteCount)
 	CoInitialize(NULL);
 	Image result = {0};
 	IStream* stream = SHCreateMemStream(bytes, (UINT)byteCount);
-	IWICImagingFactory *imagingFactory = 0;
-	CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (void **) &imagingFactory);
+	IWICImagingFactory* imagingFactory = NULL;
+	CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (void**)&imagingFactory);
 
-	IWICBitmapDecoder *decoder = 0;
-	IWICBitmapFrameDecode *frame = 0;
+	IWICBitmapDecoder* decoder = NULL;
+	IWICBitmapFrameDecode* frame = NULL;
 	imagingFactory->CreateDecoderFromStream(stream, NULL, WICDecodeMetadataCacheOnLoad, &decoder);
 	if (decoder) decoder->GetFrame(0, &frame);
 
-	IWICFormatConverter *converter = 0;
+	IWICFormatConverter* converter = NULL;
+	uint32_t width = 0;
+	uint32_t height = 0;
 	if (frame) {
 		imagingFactory->CreateFormatConverter(&converter);
 		converter->Initialize(frame, GUID_WICPixelFormat32bppRGBA, WICBitmapDitherTypeNone, 0, 0, WICBitmapPaletteTypeCustom);
-		converter->GetSize(&result.width, &result.height);
+		converter->GetSize(&width, &height);
 	}
 
-	UINT imageByteCount = result.width * result.height * 4;
-	UINT stride = result.width * 4;
-	if (imageByteCount > 0) {
-		result.pixels = (uint8_t*)malloc(imageByteCount);
-	}
+	UINT imageByteCount = width * height * 4;
+	result.pixels = allocateImageMemory(imageByteCount);
 	if (result.pixels) {
+		result.width = width;
+		result.height = height;
+		UINT stride = width * 4;
 		converter->CopyPixels(NULL, stride, imageByteCount, result.pixels);
 	}
 
@@ -80,7 +82,6 @@ Image loadImage(const uint8_t* bytes, size_t byteCount)
 	if (converter) converter->Release();
 	imagingFactory->Release();
 	stream->Release();
-
 	return result;
 }
 
@@ -89,11 +90,11 @@ ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
 	CoInitialize(NULL);
 	ImageMetadata result = {0};
 	IStream* stream = SHCreateMemStream(bytes, (UINT)byteCount);
-	IWICImagingFactory *imagingFactory = 0;
-	CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (void **) &imagingFactory);
+	IWICImagingFactory* imagingFactory = NULL;
+	CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (void**)&imagingFactory);
 
-	IWICBitmapDecoder *decoder = 0;
-	IWICBitmapFrameDecode *frame = 0;
+	IWICBitmapDecoder* decoder = NULL;
+	IWICBitmapFrameDecode* frame = NULL;
 	imagingFactory->CreateDecoderFromStream(stream, NULL, WICDecodeMetadataCacheOnLoad, &decoder);
 	if (decoder) decoder->GetFrame(0, &frame);
 	if (frame) {
@@ -102,9 +103,8 @@ ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
 	}
 
 	if (decoder) decoder->Release();
-	if (imagingFactory) imagingFactory->Release();
+	imagingFactory->Release();
 	stream->Release();
-
 	return result;
 }
 #endif // _WIN32
