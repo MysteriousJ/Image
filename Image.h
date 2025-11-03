@@ -115,27 +115,21 @@ ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
 Image loadImage(const uint8_t* bytes, size_t byteCount)
 {
 	Image result = {0};
-
 	CFDataRef data = CFDataCreate(0, bytes, byteCount);
 	CGImageSourceRef imageSource = CGImageSourceCreateWithData(data, NULL);
 	CGImage* image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
 
-	result.width = CGImageGetWidth(image);
-	result.height = CGImageGetHeight(image);
-	if (result.width > 0 && result.height > 0) {
-		result.pixels = (uint8_t*)calloc(result.width * result.height, 4);
-	}
+	uint32_t width = CGImageGetWidth(image);
+	uint32_t height = CGImageGetHeight(image);
+	size_t imageByteCount = width * height * 4;
+	result.pixels = allocateImageMemory(imageByteCount);
 	if (result.pixels) {
+		result.width = width;
+		result.height = height;
+		memset(result.pixels, 0, imageByteCount);
 		CGColorSpace* colorSpace = CGColorSpaceCreateDeviceRGB();
-		CGContext* cgContext = CGBitmapContextCreate(
-				result.pixels,
-				result.width,
-				result.height,
-				8,
-				4 * result.width,
-				colorSpace,
-				kCGImageAlphaPremultipliedLast);
-		CGRect rect = CGRectMake(0, 0, result.width, result.height);
+		CGContext* cgContext = CGBitmapContextCreate(result.pixels, width, height, 8, 4 * width, colorSpace, kCGImageAlphaPremultipliedLast);
+		CGRect rect = CGRectMake(0, 0, width, height);
 		CGContextDrawImage(cgContext, rect, image);
 
 		CGColorSpaceRelease(colorSpace);
@@ -145,14 +139,12 @@ Image loadImage(const uint8_t* bytes, size_t byteCount)
 	CGImageRelease(image);
 	CFRelease(imageSource);
 	CFRelease(data);
-
 	return result;
 }
 
 ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
 {
 	ImageMetadata result = {0};
-
 	CFDataRef data = CFDataCreate(0, bytes, byteCount);
 	CGImageSourceRef imageSource = CGImageSourceCreateWithData(data, NULL);
 	CGImage* image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
