@@ -16,6 +16,12 @@ struct ImageMetadata
 	uint32_t height;
 };
 
+uint8_t* allocateImageMemory(size_t byteCount)
+{
+	if (byteCount == 0) return NULL;
+	return (uint8_t*)malloc(byteCount);
+}
+
 void destroyImage(Image* image)
 {
 	free(image->pixels);
@@ -172,14 +178,14 @@ Image loadPng(const uint8_t* bytes, size_t byteCount)
 	png.version = PNG_IMAGE_VERSION;
 	if (png_image_begin_read_from_memory(&png, bytes, byteCount) != 0) {
 		png.format = PNG_FORMAT_RGBA;
-		result.pixels = (uint8_t*)malloc(PNG_IMAGE_SIZE(png));
+		result.pixels = allocateImageMemory(PNG_IMAGE_SIZE(png));
 	}
 	if (result.pixels) {
 		result.width = png.width;
 		result.height = png.height;
-		png_color background = {255, 255, 255};
-		png_image_finish_read(&png, &background, result.pixels, 0, 0);
+		png_image_finish_read(&png, NULL, result.pixels, 0, 0);
 	}
+	png_image_free(&png);
 	return result;
 }
 
@@ -187,10 +193,16 @@ Image loadJpeg(const uint8_t* bytes, size_t byteCount)
 {
 	Image result = {0};
 	tjhandle turbojpeg = tj3Init(TJINIT_DECOMPRESS);
+	uint32_t width  = 0;
+	uint32_t height = 0;
 	if (tj3DecompressHeader(turbojpeg, bytes, byteCount) == 0) {
-		result.width  = tj3Get(turbojpeg, TJPARAM_JPEGWIDTH);
-		result.height = tj3Get(turbojpeg, TJPARAM_JPEGHEIGHT);
-		result.pixels = (uint8_t*)malloc(result.width * result.height * 4);
+		width  = tj3Get(turbojpeg, TJPARAM_JPEGWIDTH);
+		height = tj3Get(turbojpeg, TJPARAM_JPEGHEIGHT);
+		result.pixels = allocateImageMemory(width * height * 4);
+	}
+	if (result.pixels) {
+		result.width  = width;
+		result.height = height;
 		tj3Decompress8(turbojpeg, bytes, byteCount, result.pixels, 0, TJPF_RGBA);
 	}
 	tjDestroy(turbojpeg);
