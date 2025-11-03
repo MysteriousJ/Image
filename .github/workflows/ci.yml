@@ -27,6 +27,6 @@ jobs:
     - name: apt update
       run: sudo apt-get update
     - name: install libraries
-      run: sudo apt install -y libpng libjpeg-turbo
+      run: sudo apt install -y libpng-dev libjpeg-turbo
     - name: run
       run: ./test_linux.sh
