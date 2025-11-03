@@ -10,13 +10,15 @@ jobs:
   test-windows:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: clone repo
+      uses: actions/checkout@v4
     - name: run
       run: test_windows.bat
   test-apple:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: clone repo
+      uses: actions/checkout@v4
     - name: run
       run: ./test-apple.sh
   test-linux:
@@ -24,5 +26,7 @@ jobs:
     steps:
     - name: clone repo
       uses: actions/checkout@v4
+    - name: install libraries
+      run: sudo apt install -y libpng libjpeg-turbo
     - name: run
       run: ./test_linux.sh
