@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: run
+      run: test_windows.bat
+  test-apple:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: run
+      run: ./test-apple.sh
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: run
+      run: ./test_linux.sh
