@@ -12,21 +12,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: run
-      run: test_windows.bat
+      run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          test_windows.bat
       shell: cmd
   test-apple:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
     - name: run
-      run: ./test-apple.sh
+      run: ./test_apple.sh
   test-linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: apt update
-      run: sudo apt-get update
     - name: install libraries
-      run: sudo apt install -y libpng-dev libjpeg-turbo
+      run: |
+        sudo apt-get update
+        sudo apt install -y libpng-dev libjpeg-turbo8-dev
     - name: run
       run: ./test_linux.sh
