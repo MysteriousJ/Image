@@ -29,6 +29,6 @@ jobs:
     - name: install libraries
       run: |
         sudo apt-get update
-        sudo apt install -y libpng-dev libjpeg-turbo8 libjpeg-turbo8-dev
+        sudo apt install -y libpng-dev libjpeg62-turbo-dev
     - name: run
       run: ./test_linux.sh
