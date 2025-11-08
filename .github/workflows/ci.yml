@@ -26,9 +26,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: install libraries
+    - name: install libjpeg-turbo
       run: |
-        sudo apt-get update
-        sudo apt install -y libpng-dev libjpeg-turbo8 libjpeg-turbo8-dev
+        wget https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.2/libjpeg-turbo-official_3.1.2_amd64.deb
+        sudo dpkg -i ./libjpeg-turbo-official_3.1.2_amd64.deb
+    - name: add libjpeg-turbo to path
+      run: |
+        export CPATH="$CPATH:/opt/libjpeg-turbo/include"
+        export LIBRARY_PATH="$LIBRARY_PATH:/opt/libjpeg-turbo/lib64"
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/libjpeg-turbo/lib64"
     - name: run
       run: ./test_linux.sh
