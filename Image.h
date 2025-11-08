@@ -5,7 +5,7 @@
 
 struct Image
 {
-	uint8_t* pixels; // RGBA
+	uint8_t* pixels;
 	uint32_t width;
 	uint32_t height;
 };
@@ -15,6 +15,12 @@ struct ImageMetadata
 	uint32_t width;
 	uint32_t height;
 };
+
+// Returns an Image with sRBGA 8-bits-per-color pixels (4 bytes per pixel).
+// When bytes is an invalid or unrecognized image, or when byteCount is zero,
+// pixels, width, and height are set to zero.
+Image loadImage(const uint8_t* bytes, size_t byteCount);
+ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount);
 
 uint8_t* allocateImageMemory(size_t byteCount)
 {
