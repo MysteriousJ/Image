@@ -10,3 +10,7 @@
 |jpg|✓|✓|✓|
 |png|✓|✓|✓|
 |tiff|✓|✓| |
+
+* Uses Windows Imaging Component on Windows (native operating system API)
+* Uses Core Graphics on MacOS and iOS (native operating system API)
+* Uses libpng and libjpeg-turbo on Linux
