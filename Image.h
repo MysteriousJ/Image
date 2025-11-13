@@ -166,6 +166,8 @@ ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
 #endif // __APPLE__ 
 
 #if defined(__linux__) && !defined(__ANDROID__)
+#include <gdk-pixbuf-2.0/gdk-pixbuf/gdk-pixbuf-loader.h>
+#include <glib-2.0/gobject/gobject.h>
 #include <turbojpeg.h>
 #include <png.h>
 
@@ -216,6 +218,26 @@ Image loadImage(const uint8_t* bytes, size_t byteCount)
 			result = loadJpeg(bytes, byteCount);
 		} else if (isPng(bytes, byteCount)) {
 			result = loadPng(bytes, byteCount);
+		} else {
+			GdkPixbufLoader* loader = gdk_pixbuf_loader_new();
+			gdk_pixbuf_loader_write(loader, bytes, byteCount, 0);
+			gdk_pixbuf_loader_close(loader, 0);
+			GdkPixbuf* pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
+			if (pixbuf) {
+				uint32_t width = gdk_pixbuf_get_width(pixbuf);
+				uint32_t height = gdk_pixbuf_get_height(pixbuf);
+				GdkPixbuf* rgbaPixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, width, height);
+				gdk_pixbuf_copy_area(pixbuf, 0, 0, width, height, rgbaPixbuf, 0, 0);
+				size_t imageByteCount = width * height * 4;
+				result.pixels = allocateImageMemory(imageByteCount);
+				if (result.pixels) {
+					memcpy(result.pixels, gdk_pixbuf_get_pixels(rgbaPixbuf), imageByteCount);
+					result.width = width;
+					result.height = height;
+				}
+				g_object_unref(pixbuf);
+				g_object_unref(rgbaPixbuf);
+			}
 		}
 	}
 
@@ -254,6 +276,11 @@ ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
 			result = loadJpegMetadata(bytes, byteCount);
 		} else if (isPng(bytes, byteCount)) {
 			result = loadPngMetadata(bytes, byteCount);
+		} else {
+			Image image = loadImage(bytes, byteCount);
+			result.width = image.width;
+			result.height = image.height;
+			destroyImage(&image);
 		}
 	}
 	return result;

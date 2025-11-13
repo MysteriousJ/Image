@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-
-clang -g -fsanitize=fuzzer fuzz.cpp -lturbojpeg -lpng -o fuzz
+set -e
+clang -g -fsanitize=address,fuzzer fuzz.cpp $(pkg-config --cflags --libs gdk-3.0) -lturbojpeg -lpng -o fuzz
 ./fuzz

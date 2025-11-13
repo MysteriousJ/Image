@@ -61,8 +61,13 @@ void testLoadImage(const char* path, int variability)
 
 int main()
 {
-	testLoadImage("test.png", 0);
-	testLoadImage("test.jpg", 2);
+	testLoadImage("resources/test.bmp", 0);
+	testLoadImage("resources/test.gif", 0);
+	testLoadImage("resources/test.ico", 0);
+	testLoadImage("resources/test.jpg", 2);
+	testLoadImage("resources/test.png", 0);
+	testLoadImage("resources/test.tiff", 0);
+	testLoadImage("resources/test.webp", 0);
 
 	printf("Passed %d/%d tests\n", passedTests, passedTests + failedTests);
 	return (failedTests == 0)? 0 : 1;
