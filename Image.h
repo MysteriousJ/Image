@@ -33,7 +33,6 @@ uint8_t* allocateImageMemory(size_t byteCount)
 void destroyImage(Image* image)
 {
 	free(image->pixels);
-	memset(image, 0, sizeof(Image));
 }
 
 bool isPng(const uint8_t* bytes, size_t byteCount)
