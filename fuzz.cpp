@@ -2,8 +2,8 @@
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-	Image image = loadImage(data, size);
+	Image image = decodeImage(data, size);
 	destroyImage(&image);
-	loadImageMetadata(data, size);
+	decodeImageMetadata(data, size);
 	return 0;
 }

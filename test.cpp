@@ -39,7 +39,7 @@ void testLoadImage(const char* path, int variability)
 		fread(bytes, 1, byteCount, file);
 		fclose(file);
 
-		Image image = loadImage(bytes, byteCount);
+		Image image = decodeImage(bytes, byteCount);
 		size_t pixelByteCount = image.width * image.height * 4;
 		if (closeEnough(image, expectedImage, variability))
 		{
@@ -49,7 +49,7 @@ void testLoadImage(const char* path, int variability)
 			printf("Failed test: load %s\n", path);
 		}
 
-		ImageMetadata meta = loadImageMetadata(bytes, byteCount);
+		ImageMetadata meta = decodeImageMetadata(bytes, byteCount);
 		if (meta.width == expectedImage.width && meta.height == expectedImage.height) {
 			++passedTests;
 		} else {

@@ -19,8 +19,8 @@ struct ImageMetadata
 // Returns an Image with sRBGA 8-bits-per-color pixels (4 bytes per pixel).
 // When bytes is an invalid or unrecognized image, or when byteCount is zero,
 // pixels, width, and height are set to zero.
-Image loadImage(const uint8_t* bytes, size_t byteCount);
-ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount);
+Image decodeImage(const uint8_t* bytes, size_t byteCount);
+ImageMetadata decodeImageMetadata(const uint8_t* bytes, size_t byteCount);
 
 uint8_t* allocateImageMemory(size_t byteCount)
 {
@@ -52,7 +52,7 @@ bool isJpeg(const uint8_t* bytes, size_t byteCount)
 #include <wincodec.h>
 #include <shlwapi.h>
 
-Image loadImage(const uint8_t* bytes, size_t byteCount)
+Image decodeImage(const uint8_t* bytes, size_t byteCount)
 {
 	CoInitialize(NULL);
 	Image result = {0};
@@ -91,7 +91,7 @@ Image loadImage(const uint8_t* bytes, size_t byteCount)
 	return result;
 }
 
-ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
+ImageMetadata decodeImageMetadata(const uint8_t* bytes, size_t byteCount)
 {
 	CoInitialize(NULL);
 	ImageMetadata result = {0};
@@ -118,7 +118,7 @@ ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
 #ifdef __APPLE__
 #include <CoreImage/CoreImage.h>
 
-Image loadImage(const uint8_t* bytes, size_t byteCount)
+Image decodeImage(const uint8_t* bytes, size_t byteCount)
 {
 	Image result = {0};
 	CFDataRef data = CFDataCreate(0, bytes, byteCount);
@@ -148,7 +148,7 @@ Image loadImage(const uint8_t* bytes, size_t byteCount)
 	return result;
 }
 
-ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
+ImageMetadata decodeImageMetadata(const uint8_t* bytes, size_t byteCount)
 {
 	ImageMetadata result = {0};
 	CFDataRef data = CFDataCreate(0, bytes, byteCount);
@@ -169,7 +169,7 @@ ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
 #include <turbojpeg.h>
 #include <png.h>
 
-Image loadPng(const uint8_t* bytes, size_t byteCount)
+Image decodePng(const uint8_t* bytes, size_t byteCount)
 {
 	Image result = {0};
 	png_image png = {0};
@@ -187,7 +187,7 @@ Image loadPng(const uint8_t* bytes, size_t byteCount)
 	return result;
 }
 
-Image loadJpeg(const uint8_t* bytes, size_t byteCount)
+Image decodeJpeg(const uint8_t* bytes, size_t byteCount)
 {
 	Image result = {0};
 	tjhandle turbojpeg = tj3Init(TJINIT_DECOMPRESS);
@@ -207,22 +207,22 @@ Image loadJpeg(const uint8_t* bytes, size_t byteCount)
 	return result;
 }
 
-Image loadImage(const uint8_t* bytes, size_t byteCount)
+Image decodeImage(const uint8_t* bytes, size_t byteCount)
 {
 	Image result = {0};
 
 	if (byteCount > 0) {
 		if (isJpeg(bytes, byteCount)) {
-			result = loadJpeg(bytes, byteCount);
+			result = decodeJpeg(bytes, byteCount);
 		} else if (isPng(bytes, byteCount)) {
-			result = loadPng(bytes, byteCount);
+			result = decodePng(bytes, byteCount);
 		}
 	}
 
 	return result;
 }
 
-ImageMetadata loadJpegMetadata(const uint8_t* bytes, size_t byteCount)
+ImageMetadata decodeJpegMetadata(const uint8_t* bytes, size_t byteCount)
 {
 	ImageMetadata result = {0};
 	tjhandle turbojpeg = tj3Init(TJINIT_DECOMPRESS);
@@ -234,7 +234,7 @@ ImageMetadata loadJpegMetadata(const uint8_t* bytes, size_t byteCount)
 	return result;
 }
 
-ImageMetadata loadPngMetadata(const uint8_t* bytes, size_t byteCount)
+ImageMetadata decodePngMetadata(const uint8_t* bytes, size_t byteCount)
 {
 	ImageMetadata result = {0};
 	png_image png = {.version = PNG_IMAGE_VERSION};
@@ -246,14 +246,14 @@ ImageMetadata loadPngMetadata(const uint8_t* bytes, size_t byteCount)
 	return result;
 }
 
-ImageMetadata loadImageMetadata(const uint8_t* bytes, size_t byteCount)
+ImageMetadata decodeImageMetadata(const uint8_t* bytes, size_t byteCount)
 {
 	ImageMetadata result = {0};
 	if (byteCount > 0) {
 		if (isJpeg(bytes, byteCount)) {
-			result = loadJpegMetadata(bytes, byteCount);
+			result = decodeJpegMetadata(bytes, byteCount);
 		} else if (isPng(bytes, byteCount)) {
-			result = loadPngMetadata(bytes, byteCount);
+			result = decodePngMetadata(bytes, byteCount);
 		}
 	}
 	return result;
