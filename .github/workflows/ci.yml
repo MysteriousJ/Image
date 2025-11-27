@@ -29,7 +29,7 @@ jobs:
     - name: install libpng and libwebp
       run: |
         sudo apt update
-        sudo apt install libpng-dev libwebp
+        sudo apt install libpng-dev libwebp-dev
     - name: install libjpeg-turbo
       run: |
         wget https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.2/libjpeg-turbo-official_3.1.2_amd64.deb
