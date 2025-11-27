@@ -3,7 +3,7 @@
 
 **MacOS/iOS:** Core Graphics (native operating system API)
 
-**Linux:** libpng and libjpeg-turbo
+**Linux:** libjpeg-turbo, libpng, and libwebp.
 
 # Supported Image Formats
 ||Windows|MacOS/iOS|Linux|
@@ -14,6 +14,7 @@
 |jpg|✓|✓|✓|
 |png|✓|✓|✓|
 |tiff|✓|✓| |
+|webp|✓|✓|✓|
 
 Animation is out of scope.
 
