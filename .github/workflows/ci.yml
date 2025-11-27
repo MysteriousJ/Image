@@ -26,10 +26,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: install libpng
+    - name: install libpng and libwebp
       run: |
         sudo apt update
-        sudo apt install libpng-dev
+        sudo apt install libpng-dev libwebp
     - name: install libjpeg-turbo
       run: |
         wget https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.2/libjpeg-turbo-official_3.1.2_amd64.deb
