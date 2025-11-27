@@ -15,24 +15,38 @@ struct ImageMetadata
 	uint32_t height;
 };
 
-// Returns an Image with sRBGA 8-bits-per-color pixels (4 bytes per pixel).
-// When bytes is an invalid or unrecognized image, or when byteCount is zero,
-// pixels, width, and height are set to zero.
+/* Returns an Image with sRGBA 8-bits-per-color pixels (4 bytes per pixel).
+ * When bytes is an invalid or unrecognized image, or when byteCount is zero,
+ * pixels, width, and height are set to zero. */
 Image decodeImage(const uint8_t* bytes, size_t byteCount);
+
+/* Decodes only metadata without decoding pixels.
+ * When bytes is an invalid or unrecognized image, or when byteCount is zero,
+ * width and height are set to zero. */
 ImageMetadata decodeImageMetadata(const uint8_t* bytes, size_t byteCount);
 
-///// Implementation /////
+/* Free memory for pixels.
+ * Fine to call on a zeroed image or an image that failed to decode. */
+void destroyImage(Image* image);
+
+/* Mostly for internal use, but implementations are platform independent. */
+uint8_t* allocateImageMemory(size_t byteCount);
+bool isPng(const uint8_t* bytes, size_t byteCount);
+bool isJpeg(const uint8_t* bytes, size_t byteCount);
+
+
+////////// Implementation //////////
 #include <string.h>
+
+void destroyImage(Image* image)
+{
+	free(image->pixels);
+}
 
 uint8_t* allocateImageMemory(size_t byteCount)
 {
 	if (byteCount == 0) return NULL;
 	return (uint8_t*)malloc(byteCount);
-}
-
-void destroyImage(Image* image)
-{
-	free(image->pixels);
 }
 
 bool isPng(const uint8_t* bytes, size_t byteCount)

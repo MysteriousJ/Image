@@ -48,6 +48,7 @@ void testLoadImage(const char* path, int variability)
 			++failedTests;
 			printf("Failed test: load %s\n", path);
 		}
+		destroyImage(&image);
 
 		ImageMetadata meta = decodeImageMetadata(bytes, byteCount);
 		if (meta.width == expectedImage.width && meta.height == expectedImage.height) {
@@ -56,6 +57,7 @@ void testLoadImage(const char* path, int variability)
 			++failedTests;
 			printf("Failed test: load %s metadata\n", path);
 		}
+
 	}
 }
 
