@@ -1,7 +1,6 @@
 #pragma once
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
 
 struct Image
 {
@@ -21,6 +20,9 @@ struct ImageMetadata
 // pixels, width, and height are set to zero.
 Image decodeImage(const uint8_t* bytes, size_t byteCount);
 ImageMetadata decodeImageMetadata(const uint8_t* bytes, size_t byteCount);
+
+///// Implementation /////
+#include <string.h>
 
 uint8_t* allocateImageMemory(size_t byteCount)
 {
@@ -169,7 +171,7 @@ ImageMetadata decodeImageMetadata(const uint8_t* bytes, size_t byteCount)
 #include <turbojpeg.h>
 #include <png.h>
 
-Image decodePng(const uint8_t* bytes, size_t byteCount)
+static Image decodePng(const uint8_t* bytes, size_t byteCount)
 {
 	Image result = {0};
 	png_image png = {0};
@@ -187,7 +189,7 @@ Image decodePng(const uint8_t* bytes, size_t byteCount)
 	return result;
 }
 
-Image decodeJpeg(const uint8_t* bytes, size_t byteCount)
+static Image decodeJpeg(const uint8_t* bytes, size_t byteCount)
 {
 	Image result = {0};
 	tjhandle turbojpeg = tj3Init(TJINIT_DECOMPRESS);
@@ -222,7 +224,7 @@ Image decodeImage(const uint8_t* bytes, size_t byteCount)
 	return result;
 }
 
-ImageMetadata decodeJpegMetadata(const uint8_t* bytes, size_t byteCount)
+static ImageMetadata decodeJpegMetadata(const uint8_t* bytes, size_t byteCount)
 {
 	ImageMetadata result = {0};
 	tjhandle turbojpeg = tj3Init(TJINIT_DECOMPRESS);
@@ -234,7 +236,7 @@ ImageMetadata decodeJpegMetadata(const uint8_t* bytes, size_t byteCount)
 	return result;
 }
 
-ImageMetadata decodePngMetadata(const uint8_t* bytes, size_t byteCount)
+static ImageMetadata decodePngMetadata(const uint8_t* bytes, size_t byteCount)
 {
 	ImageMetadata result = {0};
 	png_image png = {.version = PNG_IMAGE_VERSION};
