@@ -63,6 +63,13 @@ bool isJpeg(const uint8_t* bytes, size_t byteCount)
 		&& memcmp(jpegMagicNumber, bytes, sizeof(jpegMagicNumber)) == 0;
 }
 
+bool isWebp(const uint8_t* bytes, size_t byteCount)
+{
+	return byteCount > 12
+		&& memcmp("RIFF", bytes, 4) == 0
+		&& memcmp("WEBP", bytes+8, 4) == 0;
+}
+
 #ifdef _WIN32
 #include <wincodec.h>
 #include <shlwapi.h>
@@ -183,6 +190,7 @@ ImageMetadata decodeImageMetadata(const uint8_t* bytes, size_t byteCount)
 #if defined(__linux__) && !defined(__ANDROID__)
 #include <turbojpeg.h>
 #include <png.h>
+#include <webp/decode.h>
 
 static Image decodePng(const uint8_t* bytes, size_t byteCount)
 {
@@ -222,6 +230,24 @@ static Image decodeJpeg(const uint8_t* bytes, size_t byteCount)
 	return result;
 }
 
+static Image decodeWebp(const uint8_t* bytes, size_t byteCount)
+{
+	Image result = {0};
+	int width, height;
+	uint8_t* pixels = WebPDecodeRGBA(bytes, byteCount, &width, &height);
+	if (pixels) {
+		size_t pixelByteCount = width * height * 4;
+		result.pixels = (uint8_t*)malloc(pixelByteCount);
+		if (result.pixels) {
+			memcpy(result.pixels, pixels, pixelByteCount);
+			result.width = width;
+			result.height = height;
+		}
+		WebPFree(pixels);
+	}
+	return result;
+}
+
 Image decodeImage(const uint8_t* bytes, size_t byteCount)
 {
 	Image result = {0};
@@ -231,6 +257,8 @@ Image decodeImage(const uint8_t* bytes, size_t byteCount)
 			result = decodeJpeg(bytes, byteCount);
 		} else if (isPng(bytes, byteCount)) {
 			result = decodePng(bytes, byteCount);
+		} else if (isWebp(bytes, byteCount)) {
+			result = decodeWebp(bytes, byteCount);
 		}
 	}
 
@@ -261,6 +289,17 @@ static ImageMetadata decodePngMetadata(const uint8_t* bytes, size_t byteCount)
 	return result;
 }
 
+static ImageMetadata decodeWebpMetadata(const uint8_t* bytes, size_t byteCount)
+{
+	ImageMetadata result = {0};
+	int width, height;
+	if (WebPGetInfo(bytes, byteCount, &width, &height)) {
+		result.width = width;
+		result.height = height;
+	}
+	return result;
+}
+
 ImageMetadata decodeImageMetadata(const uint8_t* bytes, size_t byteCount)
 {
 	ImageMetadata result = {0};
@@ -269,6 +308,8 @@ ImageMetadata decodeImageMetadata(const uint8_t* bytes, size_t byteCount)
 			result = decodeJpegMetadata(bytes, byteCount);
 		} else if (isPng(bytes, byteCount)) {
 			result = decodePngMetadata(bytes, byteCount);
+		} else if (isWebp(bytes, byteCount)) {
+			result = decodeWebpMetadata(bytes, byteCount);
 		}
 	}
 	return result;

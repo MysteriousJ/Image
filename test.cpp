@@ -17,18 +17,18 @@ Image expectedImage = {
 	2,
 };
 
-bool closeEnough(Image a, Image b, int variability)
+bool closeEnough(Image a, Image b, int tolerance)
 {
 	if (a.width != b.width || a.height != b.height) return false;
 	for (int i=0; i < sizeof(expectedPixels); ++i) {
-		if (abs(a.pixels[i] - b.pixels[i]) > variability) {
+		if (abs(a.pixels[i] - b.pixels[i]) > tolerance) {
 			return false;
 		}
 	}
 	return true;
 }
 
-void testLoadImage(const char* path, int variability)
+void testLoadImage(const char* path, int tolerance)
 {
 	FILE* file = fopen(path, "rb");
 	if (file) {
@@ -41,7 +41,7 @@ void testLoadImage(const char* path, int variability)
 
 		Image image = decodeImage(bytes, byteCount);
 		size_t pixelByteCount = image.width * image.height * 4;
-		if (closeEnough(image, expectedImage, variability))
+		if (closeEnough(image, expectedImage, tolerance))
 		{
 			++passedTests;
 		} else {
@@ -57,14 +57,14 @@ void testLoadImage(const char* path, int variability)
 			++failedTests;
 			printf("Failed test: load %s metadata\n", path);
 		}
-
 	}
 }
 
 int main()
 {
-	testLoadImage("test.png", 0);
-	testLoadImage("test.jpg", 2);
+	testLoadImage("./resources/test.jpg", 2);
+	testLoadImage("./resources/test.png", 0);
+	testLoadImage("./resources/test.webp", 0);
 
 	printf("Passed %d/%d tests\n", passedTests, passedTests + failedTests);
 	return (failedTests == 0)? 0 : 1;
